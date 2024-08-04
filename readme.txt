@@ -1,6 +1,10 @@
 
 Hospital Application that administers patients
 
+github link: https://github.com/pronoyf/CSI3140_A4
+
+names: Kevin Naveen 300235454
+Pronoy Fuad 300269503
 
 For the development of our application, we used:
 
