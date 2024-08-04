@@ -217,13 +217,15 @@ def logout():
     logout_user()
     flash("Logged out", "success")
     return redirect(url_for('index'))
-
 @app.route("/patient_dashboard", methods=['GET', 'POST'])
 @login_required
 def patient_dashboard():
     if current_user.role != 'Patient':
         flash('Access denied.', 'danger')
         return redirect(url_for('index'))
+
+    # Fetch current patient info
+    patient = Patients.query.filter_by(user_id=current_user.user_id).first()
 
     if request.method == 'POST':
         severity = request.form['severity']
@@ -233,10 +235,10 @@ def patient_dashboard():
             INSERT INTO queue (patient_id, severity, wait_time, status) 
             VALUES (:patient_id, :severity, :wait_time, 'waiting');
         """)
-        
+
         try:
             db.session.execute(insert_queue_query, {
-                'patient_id': current_user.user_id,
+                'patient_id': patient.patient_id,  # Use patient's ID
                 'severity': severity,
                 'wait_time': wait_time
             })
@@ -248,15 +250,10 @@ def patient_dashboard():
               flash('An error occurred trying to add queue', 'danger')
               print(e)
 
-    
-    # Fetch current patient info
-    patient = Patients.query.filter_by(user_id=current_user.user_id).first()
-    
     # Fetch queue status
-    queue_status = Queue.query.filter_by(patient_id=current_user.user_id).all()
+    queue_status = Queue.query.filter_by(patient_id=patient.patient_id).all()
 
     return render_template('patient_dashboard.html', patient=patient, queue_status=queue_status)
-
 
 @app.route("/staff_dashboard", methods=['GET', 'POST'])
 @login_required
